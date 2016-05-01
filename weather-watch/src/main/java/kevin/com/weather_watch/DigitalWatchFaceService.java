@@ -456,8 +456,8 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             // Draw the background.
             canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
 
-            // Draw the hours.
-            float x = mXOffset;
+            // Determine value of what to draw
+            // Hour value
             String hourString;
             if (is24Hour) {
                 hourString = formatTwoDigitNumber(mCalendar.get(Calendar.HOUR_OF_DAY));
@@ -468,6 +468,18 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                 }
                 hourString = String.valueOf(hour);
             }
+
+            // minutes
+            String minuteString = formatTwoDigitNumber(mCalendar.get(Calendar.MINUTE));
+
+            // offset
+            float x = (bounds.width()
+                    - mHourPaint.measureText(hourString)
+                    - mColonWidth
+                    - mMinutePaint.measureText(minuteString)) / 2;
+
+
+            // Draw the hours, colon and minutes
             canvas.drawText(hourString, x, mYOffset, mHourPaint);
             x += mHourPaint.measureText(hourString);
 
@@ -479,36 +491,15 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             x += mColonWidth;
 
             // Draw the minutes.
-            String minuteString = formatTwoDigitNumber(mCalendar.get(Calendar.MINUTE));
             canvas.drawText(minuteString, x, mYOffset, mMinutePaint);
-            x += mMinutePaint.measureText(minuteString);
-
-            // In unmuted interactive mode, draw a second blinking colon followed by the seconds.
-            // Otherwise, if we're in 12-hour mode, draw AM/PM
-//            if (!isInAmbientMode() && !mMute) {
-//                if (mShouldDrawColons) {
-//                    canvas.drawText(COLON_STRING, x, mYOffset, mColonPaint);
-//                }
-//                x += mColonWidth;
-//                canvas.drawText(formatTwoDigitNumber(
-//                        mCalendar.get(Calendar.SECOND)), x, mYOffset, mSecondPaint);
-//            } else if (!is24Hour) {
-//                x += mColonWidth;
-//                canvas.drawText(getAmPmString(
-//                        mCalendar.get(Calendar.AM_PM)), x, mYOffset, mAmPmPaint);
-//            }
+            //x += mMinutePaint.measureText(minuteString);
 
             // Only render the day of week and date if there is no peek card, so they do not bleed
             // into each other in ambient mode.
             if (getPeekCardPosition().isEmpty()) {
-                // Day of week
-//                canvas.drawText(
-//                        mDayOfWeekFormat.format(mDate),
-
 
                 // Date
                 String mFormattedDate =  mDateFormat.format(mDate);
-                //x = (bounds.width() - mDatePaint.measureText(mDateFormat.format(mDate)))/2;
                 x = (bounds.width() - mDatePaint.measureText(mFormattedDate))/2;
 
                 canvas.drawText(
