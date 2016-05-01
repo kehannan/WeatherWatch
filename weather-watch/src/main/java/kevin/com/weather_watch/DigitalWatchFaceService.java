@@ -200,8 +200,8 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
             mBackgroundPaint = new Paint();
             mBackgroundPaint.setColor(getResources().getColor(R.color.primary));
-            mDatePaint = createTextPaint(resources.getColor(R.color.digital_date));
-            mHourPaint = createTextPaint(mInteractiveHourDigitsColor, BOLD_TYPEFACE);
+            mDatePaint = createTextPaint(resources.getColor(R.color.white));
+            mHourPaint = createTextPaint(mInteractiveHourDigitsColor);
             mMinutePaint = createTextPaint(mInteractiveMinuteDigitsColor);
             mSecondPaint = createTextPaint(mInteractiveSecondDigitsColor);
             mAmPmPaint = createTextPaint(resources.getColor(R.color.digital_am_pm));
@@ -260,10 +260,11 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
         }
 
         private void initFormats() {
-            mDayOfWeekFormat = new SimpleDateFormat("EEEE", Locale.getDefault());
+            mDayOfWeekFormat = new SimpleDateFormat("EEE", Locale.getDefault());
             mDayOfWeekFormat.setCalendar(mCalendar);
-            mDateFormat = DateFormat.getDateFormat(DigitalWatchFaceService.this);
-            mDateFormat.setCalendar(mCalendar);
+            //mDateFormat = DateFormat.getDateFormat(DigitalWatchFaceService.this);
+            mDateFormat = new SimpleDateFormat("EEE, MMM dd yyyy", Locale.getDefault());
+            //mDateFormat.setCalendar(mCalendar);
         }
 
         private void registerReceiver() {
@@ -316,7 +317,6 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             super.onPropertiesChanged(properties);
 
             boolean burnInProtection = properties.getBoolean(PROPERTY_BURN_IN_PROTECTION, false);
-            mHourPaint.setTypeface(burnInProtection ? NORMAL_TYPEFACE : BOLD_TYPEFACE);
 
             mLowBitAmbient = properties.getBoolean(PROPERTY_LOW_BIT_AMBIENT, false);
 
@@ -485,30 +485,35 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
             // In unmuted interactive mode, draw a second blinking colon followed by the seconds.
             // Otherwise, if we're in 12-hour mode, draw AM/PM
-            if (!isInAmbientMode() && !mMute) {
-                if (mShouldDrawColons) {
-                    canvas.drawText(COLON_STRING, x, mYOffset, mColonPaint);
-                }
-                x += mColonWidth;
-                canvas.drawText(formatTwoDigitNumber(
-                        mCalendar.get(Calendar.SECOND)), x, mYOffset, mSecondPaint);
-            } else if (!is24Hour) {
-                x += mColonWidth;
-                canvas.drawText(getAmPmString(
-                        mCalendar.get(Calendar.AM_PM)), x, mYOffset, mAmPmPaint);
-            }
+//            if (!isInAmbientMode() && !mMute) {
+//                if (mShouldDrawColons) {
+//                    canvas.drawText(COLON_STRING, x, mYOffset, mColonPaint);
+//                }
+//                x += mColonWidth;
+//                canvas.drawText(formatTwoDigitNumber(
+//                        mCalendar.get(Calendar.SECOND)), x, mYOffset, mSecondPaint);
+//            } else if (!is24Hour) {
+//                x += mColonWidth;
+//                canvas.drawText(getAmPmString(
+//                        mCalendar.get(Calendar.AM_PM)), x, mYOffset, mAmPmPaint);
+//            }
 
             // Only render the day of week and date if there is no peek card, so they do not bleed
             // into each other in ambient mode.
             if (getPeekCardPosition().isEmpty()) {
                 // Day of week
-                canvas.drawText(
-                        mDayOfWeekFormat.format(mDate),
-                        mXOffset, mYOffset + mLineHeight, mDatePaint);
+//                canvas.drawText(
+//                        mDayOfWeekFormat.format(mDate),
+
+
                 // Date
+                String mFormattedDate =  mDateFormat.format(mDate);
+                //x = (bounds.width() - mDatePaint.measureText(mDateFormat.format(mDate)))/2;
+                x = (bounds.width() - mDatePaint.measureText(mFormattedDate))/2;
+
                 canvas.drawText(
-                        mDateFormat.format(mDate),
-                        mXOffset, mYOffset + mLineHeight * 2, mDatePaint);
+                        mFormattedDate,
+                        x, mYOffset + mLineHeight, mDatePaint);
             }
         }
 
