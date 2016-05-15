@@ -140,6 +140,7 @@ public class MainActivity extends AppCompatActivity implements ForecastFragment.
     }
 
     private void sendNotification() {
+        Log.v(LOG_TAG, "sendNotification()");
         if (mGoogleApiClient.isConnected()) {
             PutDataMapRequest dataMapRequest = PutDataMapRequest.create("/mypath");
             // Make sure the data item is unique. Usually, this will not be required, as the payload
@@ -214,6 +215,9 @@ public class MainActivity extends AppCompatActivity implements ForecastFragment.
                     .replace(R.id.weather_detail_container, fragment, DETAILFRAGMENT_TAG)
                     .commit();
         } else {
+            // test line
+            sendNotification();
+
             Intent intent = new Intent(this, DetailActivity.class)
                     .setData(contentUri);
 

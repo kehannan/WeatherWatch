@@ -182,9 +182,8 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
         @Override
         public void onCreate(SurfaceHolder holder) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "onCreate");
-            }
+            Log.d(TAG, "onCreate");
+
             super.onCreate(holder);
 
             setWatchFaceStyle(new WatchFaceStyle.Builder(DigitalWatchFaceService.this)
@@ -565,6 +564,9 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
         @Override // DataApi.DataListener
         public void onDataChanged(DataEventBuffer dataEvents) {
+
+            Log.v(TAG, "onDataChanged()");
+
             for (DataEvent dataEvent : dataEvents) {
                 if (dataEvent.getType() != DataEvent.TYPE_CHANGED) {
                     continue;
