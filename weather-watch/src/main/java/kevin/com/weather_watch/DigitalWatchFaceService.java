@@ -570,7 +570,11 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                     continue;
                 }
 
+
                 DataItem dataItem = dataEvent.getDataItem();
+
+                Log.v(TAG, "dataItem.getUri().getPath() " + dataItem.getUri().getPath());
+
                 if (!dataItem.getUri().getPath().equals(
                         DigitalWatchFaceUtil.PATH_WITH_FEATURE)) {
                     continue;

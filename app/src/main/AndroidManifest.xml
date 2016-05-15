@@ -15,7 +15,7 @@
      limitations under the License.
  -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.android.sunshine.app" >
+    package="com.kevin.android.weatherwatch.app" >
 
     <!-- This permission is necessary in order for Sunshine to perform network access. -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -35,7 +35,7 @@
     <!-- Permissions required for Google Cloud Messaging -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
-    <permission android:name="com.example.android.sunshine.app.permission.C2D_MESSAGE"
+    <permission android:name="com.kevin.android.weatherwatch.app.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
     <uses-permission android:name="com.example.android.sunshine.app.permission.C2D_MESSAGE" />
 
@@ -52,7 +52,7 @@
         android:theme="@style/AppTheme"
         android:supportsRtl="true">
         <activity
-            android:name=".MainActivity"
+            android:name="com.kevin.android.weatherwatch.app.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.Main">
             <intent-filter>
@@ -62,31 +62,31 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".DetailActivity"
+            android:name="com.kevin.android.weatherwatch.app.DetailActivity"
             android:label="@string/title_activity_detail"
-            android:parentActivityName=".MainActivity"
+            android:parentActivityName="com.kevin.android.weatherwatch.app.MainActivity"
             android:theme="@style/AppTheme.Details">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.android.sunshine.app.MainActivity" />
+                android:value="com.kevin.android.weatherwatch.app.MainActivity" />
         </activity>
         <activity
-            android:name=".SettingsActivity"
+            android:name="com.kevin.android.weatherwatch.app.SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:parentActivityName=".MainActivity"
+            android:parentActivityName="com.kevin.android.weatherwatch.app.MainActivity"
             android:theme="@style/SettingsTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.android.sunshine.app.MainActivity" />
+                android:value="com.kevin.android.weatherwatch.app.MainActivity" />
         </activity>
         <provider
             android:authorities="@string/content_authority"
-            android:name=".data.WeatherProvider"
+            android:name="com.kevin.android.weatherwatch.app.data.WeatherProvider"
             android:exported="false"
             android:syncable="true" />
 
         <!-- SyncAdapter's dummy authentication service -->
-        <service android:name=".sync.SunshineAuthenticatorService">
+        <service android:name="com.kevin.android.weatherwatch.app.sync.SunshineAuthenticatorService">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>
@@ -97,7 +97,7 @@
 
         <!-- The SyncAdapter service -->
         <service
-            android:name=".sync.SunshineSyncService"
+            android:name="com.kevin.android.weatherwatch.app.sync.SunshineSyncService"
             android:exported="true"
             >
             <intent-filter>
@@ -120,7 +120,7 @@
             </intent-filter>
         </receiver>
         <!-- Muzei Extension -->
-        <service android:name=".muzei.WeatherMuzeiSource"
+        <service android:name="com.kevin.android.weatherwatch.app.muzei.WeatherMuzeiSource"
             android:icon="@drawable/ic_muzei"
             android:label="@string/app_name"
             android:description="@string/muzei_description" >
@@ -131,7 +131,7 @@
         </service>
         <!-- Today Widget -->
         <receiver
-            android:name=".widget.TodayWidgetProvider"
+            android:name="com.kevin.android.weatherwatch.app.widget.TodayWidgetProvider"
             android:label="@string/title_widget_today" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -140,10 +140,10 @@
             <meta-data android:name="android.appwidget.provider"
                 android:resource="@xml/widget_info_today" />
         </receiver>
-        <service android:name=".widget.TodayWidgetIntentService" />
+        <service android:name="com.kevin.android.weatherwatch.app.widget.TodayWidgetIntentService" />
         <!-- Detail Widget -->
         <receiver
-            android:name=".widget.DetailWidgetProvider"
+            android:name="com.kevin.android.weatherwatch.app.widget.DetailWidgetProvider"
             android:label="@string/title_widget_detail"
             android:enabled="@bool/widget_detail_enabled" >
             <intent-filter>
@@ -154,26 +154,26 @@
                 android:resource="@xml/widget_info_detail" />
         </receiver>
         <service
-            android:name=".widget.DetailWidgetRemoteViewsService"
+            android:name="com.kevin.android.weatherwatch.app.widget.DetailWidgetRemoteViewsService"
             android:enabled="@bool/widget_detail_enabled"
             android:exported="false"
             android:permission="android.permission.BIND_REMOTEVIEWS" />
         <service
-            android:name="gcm.MyGcmListenerService"
+            android:name="com.kevin.android.weatherwatch.app.gcm.MyGcmListenerService"
             android:exported="false" >
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
             </intent-filter>
         </service>
         <service
-            android:name="gcm.MyInstanceIDListenerService"
+            android:name="com.kevin.android.weatherwatch.app.gcm.MyInstanceIDListenerService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.android.gms.iid.InstanceID"/>
             </intent-filter>
         </service>
         <service
-            android:name=".gcm.RegistrationIntentService"
+            android:name="com.kevin.android.weatherwatch.app.gcm.RegistrationIntentService"
             android:exported="false" >
         </service>
     </application>

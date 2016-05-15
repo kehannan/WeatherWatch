@@ -51,7 +51,7 @@ import java.util.concurrent.TimeUnit;
  * Analog watch face with a ticking second hand. In ambient mode, the second hand isn't shown. On
  * devices with low-bit ambient mode, the hands are drawn without anti-aliasing in ambient mode.
  */
-public class CustomWatchFaceService extends CanvasWatchFaceService {
+public class git sCustomWatchFaceService extends CanvasWatchFaceService {
 
     private final String TAG = "CustomWatchFaceService";
 
