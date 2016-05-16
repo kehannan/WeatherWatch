@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package kevin.com.weather_watch;
+package com.kevin.android.weatherwatch.app;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package kevin.com.weather_watch;
+package com.kevin.android.weatherwatch.app;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -22,30 +22,22 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.service.wallpaper.WallpaperService;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.text.format.Time;
 import android.util.Log;
-import android.view.Display;
-import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
-import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowInsets;
-import android.view.WindowManager;
-import android.widget.TextView;
 
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+
 
 /**
  * Analog watch face with a ticking second hand. In ambient mode, the second hand isn't shown. On

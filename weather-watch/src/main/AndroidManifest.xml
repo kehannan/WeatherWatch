@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="kevin.com.weather_watch" >
+    package="com.kevin.android.weatherwatch.app" >
 
     <uses-feature android:name="android.hardware.type.watch" />
 
@@ -15,7 +15,7 @@
         android:supportsRtl="true"
         android:theme="@android:style/Theme.DeviceDefault" >
         <service
-            android:name=".CustomWatchFaceService"
+            android:name="com.kevin.android.weatherwatch.app.CustomWatchFaceService"
             android:label="@string/weather_watch_digital"
             android:permission="android.permission.BIND_WALLPAPER" >
             <meta-data
@@ -36,7 +36,7 @@
         </service>
 
         <service
-            android:name="kevin.com.weather_watch.LayoutFaceService"
+            android:name="com.kevin.android.weatherwatch.app.LayoutFaceService"
             android:label="@string/my_digital_name"
             android:permission="android.permission.BIND_WALLPAPER" >
             <meta-data
@@ -56,7 +56,7 @@
         </service>
 
         <service
-            android:name=".DigitalWatchFaceService"
+            android:name="com.kevin.android.weatherwatch.app.DigitalWatchFaceService"
             android:label="@string/weather_watch"
             android:permission="android.permission.BIND_WALLPAPER" >
             <meta-data

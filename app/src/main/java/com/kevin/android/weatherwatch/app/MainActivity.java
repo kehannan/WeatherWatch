@@ -41,7 +41,8 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.Wearable;
 
-public class MainActivity extends AppCompatActivity implements ForecastFragment.Callback {
+public class MainActivity extends AppCompatActivity implements ForecastFragment.Callback, GoogleApiClient.ConnectionCallbacks,
+    GoogleApiClient.OnConnectionFailedListener {
 
     private final String LOG_TAG = MainActivity.class.getSimpleName();
     private static final String DETAILFRAGMENT_TAG = "DFTAG";
@@ -116,28 +117,31 @@ public class MainActivity extends AppCompatActivity implements ForecastFragment.
         }
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
-                    @Override
-                    public void onConnected(Bundle connectionHint) {
-                        Log.d(LOG_TAG, "onConnected: " + connectionHint);
-                    }
-                    @Override
-                    public void onConnectionSuspended(int cause) {
-                        Log.d(LOG_TAG, "onConnectionSuspended: " + cause);
-                    }
-                })
-                .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
-                    @Override
-                    public void onConnectionFailed(ConnectionResult result) {
-                        Log.d(LOG_TAG, "onConnectionFailed: " + result);
-                    }
-                })
                 .addApi(Wearable.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
                 .build();
-
+        mGoogleApiClient.connect();
         sendNotification();
 
     }
+
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        Log.d(LOG_TAG, "onConnected: " + connectionHint);
+    }
+
+    @Override
+    public void onConnectionSuspended(int cause) {
+        Log.d(LOG_TAG, "onConnectionSuspended: " + cause);
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult result) {
+        Log.d(LOG_TAG, "onConnectionFailed: " + result);
+    }
+
+
 
     private void sendNotification() {
         Log.v(LOG_TAG, "sendNotification()");
@@ -216,7 +220,6 @@ public class MainActivity extends AppCompatActivity implements ForecastFragment.
                     .commit();
         } else {
             // test line
-            sendNotification();
 
             Intent intent = new Intent(this, DetailActivity.class)
                     .setData(contentUri);

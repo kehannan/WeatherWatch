@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package kevin.com.weather_watch;
+package com.kevin.android.weatherwatch.app;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -22,7 +22,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -45,6 +44,7 @@ import android.widget.TextView;
 
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+
 
 
 /**
