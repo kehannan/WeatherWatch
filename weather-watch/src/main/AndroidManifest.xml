@@ -14,46 +14,6 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.DeviceDefault" >
-        <service
-            android:name="com.kevin.android.weatherwatch.app.CustomWatchFaceService"
-            android:label="@string/weather_watch_digital"
-            android:permission="android.permission.BIND_WALLPAPER" >
-            <meta-data
-                android:name="android.service.wallpaper"
-                android:resource="@xml/watch_face" />
-            <meta-data
-                android:name="com.google.android.wearable.watchface.preview"
-                android:resource="@drawable/preview_analog" />
-            <meta-data
-                android:name="com.google.android.wearable.watchface.preview_circular"
-                android:resource="@drawable/preview_analog" />
-
-            <intent-filter>
-                <action android:name="android.service.wallpaper.WallpaperService" />
-
-                <category android:name="com.google.android.wearable.watchface.category.WATCH_FACE" />
-            </intent-filter>
-        </service>
-
-        <service
-            android:name="com.kevin.android.weatherwatch.app.LayoutFaceService"
-            android:label="@string/my_digital_name"
-            android:permission="android.permission.BIND_WALLPAPER" >
-            <meta-data
-                android:name="android.service.wallpaper"
-                android:resource="@xml/watch_face" />
-            <meta-data
-                android:name="com.google.android.wearable.watchface.preview"
-                android:resource="@drawable/preview_analog" />
-            <meta-data
-                android:name="com.google.android.wearable.watchface.preview_circular"
-                android:resource="@drawable/preview_analog" />
-
-            <intent-filter>
-                <action android:name="android.service.wallpaper.WallpaperService" />
-                <category android:name="com.google.android.wearable.watchface.category.WATCH_FACE" />
-            </intent-filter>
-        </service>
 
         <service
             android:name="com.kevin.android.weatherwatch.app.DigitalWatchFaceService"
