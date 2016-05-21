@@ -120,6 +120,9 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             }
         };
 
+        // Symbol for degrees
+        private static final String DEGREE  = "\u00b0";
+
         GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(DigitalWatchFaceService.this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
@@ -151,6 +154,7 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
         Paint mSecondPaint;
         Paint mAmPmPaint;
         Paint mColonPaint;
+        Paint mWeatherPaint;
         float mColonWidth;
         boolean mMute;
 
@@ -165,6 +169,9 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
         float mLineHeight;
         String mAmString;
         String mPmString;
+
+        double mLowTemp;
+        double mHighTemp;
         int mInteractiveBackgroundColor =
                 DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_BACKGROUND;
         int mInteractiveHourDigitsColor =
@@ -200,6 +207,7 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             mBackgroundPaint = new Paint();
             mBackgroundPaint.setColor(getResources().getColor(R.color.primary));
             mDatePaint = createTextPaint(resources.getColor(R.color.white));
+            mWeatherPaint = createTextPaint(resources.getColor(R.color.white));
             mHourPaint = createTextPaint(mInteractiveHourDigitsColor);
             mMinutePaint = createTextPaint(mInteractiveMinuteDigitsColor);
             mSecondPaint = createTextPaint(mInteractiveSecondDigitsColor);
@@ -236,7 +244,7 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 //            if (Log.isLoggable(TAG, Log.DEBUG)) {
 //                Log.d(TAG, "onVisibilityChanged: " + visible);
 //            }
-//            super.onVisibilityChanged(visible);
+            super.onVisibilityChanged(visible);
 //
 //            if (visible) {
 //                mGoogleApiClient.connect();
@@ -309,6 +317,7 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             mSecondPaint.setTextSize(textSize);
             mAmPmPaint.setTextSize(amPmSize);
             mColonPaint.setTextSize(textSize);
+            mWeatherPaint.setTextSize(textSize);
 
             mColonWidth = mColonPaint.measureText(COLON_STRING);
         }
@@ -339,19 +348,19 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
         @Override
         public void onAmbientModeChanged(boolean inAmbientMode) {
             super.onAmbientModeChanged(inAmbientMode);
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "onAmbientModeChanged: " + inAmbientMode);
-            }
-            adjustPaintColorToCurrentMode(mBackgroundPaint, mInteractiveBackgroundColor,
-                    DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_BACKGROUND);
-            adjustPaintColorToCurrentMode(mHourPaint, mInteractiveHourDigitsColor,
-                    DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_HOUR_DIGITS);
-            adjustPaintColorToCurrentMode(mMinutePaint, mInteractiveMinuteDigitsColor,
-                    DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_MINUTE_DIGITS);
-            // Actually, the seconds are not rendered in the ambient mode, so we could pass just any
-            // value as ambientColor here.
-            adjustPaintColorToCurrentMode(mSecondPaint, mInteractiveSecondDigitsColor,
-                    DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_SECOND_DIGITS);
+//            if (Log.isLoggable(TAG, Log.DEBUG)) {
+//                Log.d(TAG, "onAmbientModeChanged: " + inAmbientMode);
+//            }
+//            adjustPaintColorToCurrentMode(mBackgroundPaint, mInteractiveBackgroundColor,
+//                    DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_BACKGROUND);
+//            adjustPaintColorToCurrentMode(mHourPaint, mInteractiveHourDigitsColor,
+//                    DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_HOUR_DIGITS);
+//            adjustPaintColorToCurrentMode(mMinutePaint, mInteractiveMinuteDigitsColor,
+//                    DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_MINUTE_DIGITS);
+//            // Actually, the seconds are not rendered in the ambient mode, so we could pass just any
+//            // value as ambientColor here.
+//            adjustPaintColorToCurrentMode(mSecondPaint, mInteractiveSecondDigitsColor,
+//                    DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_SECOND_DIGITS);
 
             if (mLowBitAmbient) {
                 boolean antiAlias = !inAmbientMode;
@@ -495,17 +504,32 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             canvas.drawText(minuteString, x, mYOffset, mMinutePaint);
             //x += mMinutePaint.measureText(minuteString);
 
-            // Only render the day of week and date if there is no peek card, so they do not bleed
-            // into each other in ambient mode.
-            if (getPeekCardPosition().isEmpty()) {
 
-                // Date
-                String mFormattedDate =  mDateFormat.format(mDate);
-                x = (bounds.width() - mDatePaint.measureText(mFormattedDate))/2;
 
+            // Date
+            String mFormattedDate =  mDateFormat.format(mDate);
+            x = (bounds.width() - mDatePaint.measureText(mFormattedDate))/2;
+
+            canvas.drawText(
+                    mFormattedDate,
+                    x, mYOffset + mLineHeight, mDatePaint);
+
+
+            // Weather Info
+
+            if(mLowTemp !=0 && mHighTemp !=0) {
+
+                String mWeather = Math.round(mLowTemp) + DEGREE + " " +
+                        Math.round(mHighTemp) + DEGREE;
+
+                x = (bounds.width() - mWeatherPaint.measureText(mWeather))/2;
+
+                Log.v(TAG, "bounds.width() " + bounds.width() );
+                Log.v(TAG, "mWeatherPaint " + mWeatherPaint.measureText(mWeather));
+                Log.v(TAG, "x " + x);
                 canvas.drawText(
-                        mFormattedDate,
-                        x, mYOffset + mLineHeight, mDatePaint);
+                        mWeather,
+                        x, mYOffset + 3 * mLineHeight, mWeatherPaint);
             }
         }
 
@@ -578,18 +602,24 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
                 Log.v(TAG, "dataItem.getUri().getPath() " + dataItem.getUri().getPath());
 
-                if (!dataItem.getUri().getPath().equals(
-                        DigitalWatchFaceUtil.PATH_WITH_FEATURE)) {
-                    continue;
-                }
+//                if (!dataItem.getUri().getPath().equals(
+//                        DigitalWatchFaceUtil.PATH_WITH_FEATURE)) {
+//                    continue;
+//                }
 
-                DataMapItem dataMapItem = DataMapItem.fromDataItem(dataItem);
-                DataMap config = dataMapItem.getDataMap();
-                if (Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, "Config DataItem updated:" + config);
-                }
-                updateUiForConfigDataMap(config);
+                DataMap dataMap = DataMapItem.fromDataItem(dataItem).getDataMap();
+
+                Log.v(TAG, String.valueOf(dataMap.getDouble("low")));
+                Log.v(TAG, String.valueOf(dataMap.getDouble("high")));
+
+                mLowTemp = dataMap.getDouble("low");
+                mHighTemp = dataMap.getDouble("high");
+//                if (Log.isLoggable(TAG, Log.DEBUG)) {
+//                    Log.d(TAG, "Config DataItem updated:" + config);
+//                }
+//                updateUiForConfigDataMap(config);
             }
+            invalidate();
         }
 
         private void updateUiForConfigDataMap(final DataMap config) {
@@ -636,13 +666,12 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
         @Override  // GoogleApiClient.ConnectionCallbacks
         public void onConnected(Bundle connectionHint) {
-                Log.d(TAG, "onConnected: " + connectionHint);
 
             Log.d(TAG, "connected GoogleAPI");
 
 
             Wearable.DataApi.addListener(mGoogleApiClient, Engine.this);
-            updateConfigDataItemAndUiOnStartup();
+            //updateConfigDataItemAndUiOnStartup();
         }
 
         @Override  // GoogleApiClient.ConnectionCallbacks

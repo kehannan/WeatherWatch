@@ -118,13 +118,13 @@ public class MainActivity extends AppCompatActivity implements ForecastFragment.
             }
         }
 
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(Wearable.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
-        mGoogleApiClient.connect();
-        sendNotification();
+//        mGoogleApiClient = new GoogleApiClient.Builder(this)
+//                .addApi(Wearable.API)
+//                .addConnectionCallbacks(this)
+//                .addOnConnectionFailedListener(this)
+//                .build();
+//        mGoogleApiClient.connect();
+//        sendNotification();
 
     }
 
@@ -147,12 +147,8 @@ public class MainActivity extends AppCompatActivity implements ForecastFragment.
 
     private void sendNotification() {
         Log.v(LOG_TAG, "sendNotification()");
-        //if (mGoogleApiClient.isConnected()) {
+
             PutDataMapRequest dataMapRequest = PutDataMapRequest.create("/mypath").setUrgent();
-            // Make sure the data item is unique. Usually, this will not be required, as the payload
-            // (in this case the title and the content of the notification) will be different for almost all
-            // situations. However, in this example, the text and the content are always the same, so we need
-            // to disambiguate the data item by adding a field that contains teh current time in milliseconds.
             dataMapRequest.getDataMap().putDouble("time_stamp", System.currentTimeMillis());
             dataMapRequest.getDataMap().putString("title", "This is the title");
             dataMapRequest.getDataMap().putString("body_text", "This is a notification with some text.");
@@ -168,10 +164,6 @@ public class MainActivity extends AppCompatActivity implements ForecastFragment.
                             }
                         }
                     });
-        //}
-        //else {
-       //    Log.e(LOG_TAG, "No connection to wearable available!");
-        //}
     }
 
     @Override
