@@ -209,6 +209,8 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             mCalendar = Calendar.getInstance();
             mDate = new Date();
             initFormats();
+
+            mGoogleApiClient.connect();
         }
 
         @Override
@@ -231,31 +233,31 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
         @Override
         public void onVisibilityChanged(boolean visible) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "onVisibilityChanged: " + visible);
-            }
-            super.onVisibilityChanged(visible);
-
-            if (visible) {
-                mGoogleApiClient.connect();
-
-                registerReceiver();
-
-                // Update time zone and date formats, in case they changed while we weren't visible.
-                mCalendar.setTimeZone(TimeZone.getDefault());
-                initFormats();
-            } else {
-                unregisterReceiver();
-
-                if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
-                    Wearable.DataApi.removeListener(mGoogleApiClient, this);
-                    mGoogleApiClient.disconnect();
-                }
-            }
-
-            // Whether the timer should be running depends on whether we're visible (as well as
-            // whether we're in ambient mode), so we may need to start or stop the timer.
-            updateTimer();
+//            if (Log.isLoggable(TAG, Log.DEBUG)) {
+//                Log.d(TAG, "onVisibilityChanged: " + visible);
+//            }
+//            super.onVisibilityChanged(visible);
+//
+//            if (visible) {
+//                mGoogleApiClient.connect();
+//
+//                registerReceiver();
+//
+//                // Update time zone and date formats, in case they changed while we weren't visible.
+//                mCalendar.setTimeZone(TimeZone.getDefault());
+//                initFormats();
+//            } else {
+//                unregisterReceiver();
+//
+//                if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+//                    Wearable.DataApi.removeListener(mGoogleApiClient, this);
+//                    mGoogleApiClient.disconnect();
+//                }
+//            }
+//
+//            // Whether the timer should be running depends on whether we're visible (as well as
+//            // whether we're in ambient mode), so we may need to start or stop the timer.
+//            updateTimer();
         }
 
         private void initFormats() {
@@ -572,7 +574,6 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                     continue;
                 }
 
-
                 DataItem dataItem = dataEvent.getDataItem();
 
                 Log.v(TAG, "dataItem.getUri().getPath() " + dataItem.getUri().getPath());
@@ -635,25 +636,25 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
         @Override  // GoogleApiClient.ConnectionCallbacks
         public void onConnected(Bundle connectionHint) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
                 Log.d(TAG, "onConnected: " + connectionHint);
-            }
+
+            Log.d(TAG, "connected GoogleAPI");
+
+
             Wearable.DataApi.addListener(mGoogleApiClient, Engine.this);
             updateConfigDataItemAndUiOnStartup();
         }
 
         @Override  // GoogleApiClient.ConnectionCallbacks
         public void onConnectionSuspended(int cause) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
+
                 Log.d(TAG, "onConnectionSuspended: " + cause);
-            }
         }
 
         @Override  // GoogleApiClient.OnConnectionFailedListener
         public void onConnectionFailed(ConnectionResult result) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
+
                 Log.d(TAG, "onConnectionFailed: " + result);
-            }
         }
     }
 }

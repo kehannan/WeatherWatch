@@ -31,6 +31,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.kevin.android.weatherwatch.app.data.WeatherContract;
@@ -145,8 +147,8 @@ public class MainActivity extends AppCompatActivity implements ForecastFragment.
 
     private void sendNotification() {
         Log.v(LOG_TAG, "sendNotification()");
-        if (mGoogleApiClient.isConnected()) {
-            PutDataMapRequest dataMapRequest = PutDataMapRequest.create("/mypath");
+        //if (mGoogleApiClient.isConnected()) {
+            PutDataMapRequest dataMapRequest = PutDataMapRequest.create("/mypath").setUrgent();
             // Make sure the data item is unique. Usually, this will not be required, as the payload
             // (in this case the title and the content of the notification) will be different for almost all
             // situations. However, in this example, the text and the content are always the same, so we need
@@ -155,11 +157,21 @@ public class MainActivity extends AppCompatActivity implements ForecastFragment.
             dataMapRequest.getDataMap().putString("title", "This is the title");
             dataMapRequest.getDataMap().putString("body_text", "This is a notification with some text.");
             PutDataRequest putDataRequest = dataMapRequest.asPutDataRequest();
-            Wearable.DataApi.putDataItem(mGoogleApiClient, putDataRequest);
-        }
-        else {
-            Log.e(LOG_TAG, "No connection to wearable available!");
-        }
+            Wearable.DataApi.putDataItem(mGoogleApiClient, putDataRequest)
+                    .setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
+                        @Override
+                        public void onResult(DataApi.DataItemResult dataItemResult) {
+                            if(dataItemResult.getStatus().isSuccess()) {
+                                Log.v(LOG_TAG, "send successfully");
+                            } else {
+                                Log.v(LOG_TAG, "send failure");
+                            }
+                        }
+                    });
+        //}
+        //else {
+       //    Log.e(LOG_TAG, "No connection to wearable available!");
+        //}
     }
 
     @Override
