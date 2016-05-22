@@ -21,10 +21,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -38,6 +41,7 @@ import android.view.WindowInsets;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.Asset;
 import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.DataEvent;
 import com.google.android.gms.wearable.DataEventBuffer;
@@ -46,6 +50,7 @@ import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.Wearable;
 
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -122,6 +127,9 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
         // Symbol for degrees
         private static final String DEGREE  = "\u00b0";
+
+        // Weather icon
+        Bitmap weatherIcon;
 
         GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(DigitalWatchFaceService.this)
                 .addConnectionCallbacks(this)
@@ -524,9 +532,8 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
                 x = (bounds.width() - mWeatherPaint.measureText(mWeather))/2;
 
-                Log.v(TAG, "bounds.width() " + bounds.width() );
-                Log.v(TAG, "mWeatherPaint " + mWeatherPaint.measureText(mWeather));
-                Log.v(TAG, "x " + x);
+                canvas.drawBitmap(weatherIcon, 50, mYOffset + 2 * mLineHeight, mWeatherPaint);
+
                 canvas.drawText(
                         mWeather,
                         x, mYOffset + 3 * mLineHeight, mWeatherPaint);
@@ -607,20 +614,81 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 //                    continue;
 //                }
 
-                DataMap dataMap = DataMapItem.fromDataItem(dataItem).getDataMap();
+                if (dataItem.getUri().getPath().equals("/mypath")) {
 
-                Log.v(TAG, String.valueOf(dataMap.getDouble("low")));
-                Log.v(TAG, String.valueOf(dataMap.getDouble("high")));
 
-                mLowTemp = dataMap.getDouble("low");
-                mHighTemp = dataMap.getDouble("high");
-//                if (Log.isLoggable(TAG, Log.DEBUG)) {
-//                    Log.d(TAG, "Config DataItem updated:" + config);
-//                }
-//                updateUiForConfigDataMap(config);
+                    DataMap dataMap = DataMapItem.fromDataItem(dataItem).getDataMap();
+
+                    Log.v(TAG, String.valueOf(dataMap.getDouble("low")));
+                    Log.v(TAG, String.valueOf(dataMap.getDouble("high")));
+
+                    mLowTemp = dataMap.getDouble("low");
+                    mHighTemp = dataMap.getDouble("high");
+                    Asset iconAsset = dataMap.getAsset("weatherIcon");
+                    new LoadIconAsynchTask().execute(iconAsset);
+                }
+                invalidate();
             }
-            invalidate();
         }
+
+        private class LoadIconAsynchTask extends AsyncTask<Asset, Void, Bitmap> {
+
+            @Override
+            protected Bitmap doInBackground(Asset... params) {
+
+                Asset asset = params[0];
+
+                if (asset == null) {
+                    throw new IllegalArgumentException("Asset must be non-null");
+                }
+
+                ConnectionResult result = mGoogleApiClient.blockingConnect(5000, TimeUnit.MILLISECONDS);
+                if (!result.isSuccess()) {
+                    return null;
+                  }
+
+              // convert asset into a file descriptor and block until it's ready
+            InputStream assetInputStream = Wearable.DataApi.getFdForAsset(
+                    mGoogleApiClient, asset).await().getInputStream();
+                mGoogleApiClient.disconnect();
+
+            if (assetInputStream == null) {
+                Log.w(TAG, "Requested an unknown Asset.");
+                return null;
+            }
+            // decode the stream into a bitmap
+            return BitmapFactory.decodeStream(assetInputStream);
+        }
+
+            @Override
+            protected void onPostExecute(Bitmap bitmap) {
+                if (bitmap !=null) {
+                    weatherIcon = bitmap;
+                }
+            }
+        }
+
+//        public Bitmap loadBitmapFromAsset(Asset asset) {
+//            if (asset == null) {
+//                throw new IllegalArgumentException("Asset must be non-null");
+//            }
+//            ConnectionResult result = mGoogleApiClient.blockingConnect(100, TimeUnit.MILLISECONDS);
+//            if (!result.isSuccess()) {
+//                return null;
+//            }
+//            // convert asset into a file descriptor and block until it's ready
+//            InputStream assetInputStream = Wearable.DataApi.getFdForAsset(
+//                    mGoogleApiClient, asset).await().getInputStream();
+//            mGoogleApiClient.disconnect();
+//
+//            if (assetInputStream == null) {
+//                Log.w(TAG, "Requested an unknown Asset.");
+//                return null;
+//            }
+//            // decode the stream into a bitmap
+//            return BitmapFactory.decodeStream(assetInputStream);
+//        }
+
 
         private void updateUiForConfigDataMap(final DataMap config) {
             boolean uiUpdated = false;

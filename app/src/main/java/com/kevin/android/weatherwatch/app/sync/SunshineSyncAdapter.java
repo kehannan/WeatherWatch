@@ -33,6 +33,7 @@ import com.bumptech.glide.Glide;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.wearable.Asset;
 import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
@@ -49,6 +50,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -391,7 +393,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements
 
                 // send the first item to the wearable
                 if (i == 0) {
-                    sendWeatherData(low, high);
+                    sendWeatherData(low, high, weatherId);
                 }
             }
 
@@ -700,7 +702,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements
         spe.commit();
     }
 
-    private void sendWeatherData(double low, double high) {
+    private void sendWeatherData(double low, double high, int weatherId) {
 
         Log.v(LOG_TAG, "sendNotification()");
 
@@ -708,12 +710,16 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements
         dataMapRequest.getDataMap().putDouble("time_stamp", System.currentTimeMillis());
         dataMapRequest.getDataMap().putDouble("low", low);
         dataMapRequest.getDataMap().putDouble("high", high);
+
+        Asset asset = createAssetFromBitmap(getSmallImage(weatherId));
+
+        dataMapRequest.getDataMap().putAsset("weatherIcon", asset);
         PutDataRequest putDataRequest = dataMapRequest.asPutDataRequest();
         Wearable.DataApi.putDataItem(mGoogleApiClient, putDataRequest)
                 .setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
                     @Override
                     public void onResult(DataApi.DataItemResult dataItemResult) {
-                        if(dataItemResult.getStatus().isSuccess()) {
+                        if (dataItemResult.getStatus().isSuccess()) {
                             Log.v(LOG_TAG, "send successfully");
                         } else {
                             Log.v(LOG_TAG, "send failure");
@@ -722,4 +728,41 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements
                 });
 
     }
+
+    private static Asset createAssetFromBitmap(Bitmap bitmap) {
+        final ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteStream);
+        return Asset.createFromBytes(byteStream.toByteArray());
+    }
+
+    private Bitmap getSmallImage(int weatherId) {
+
+        Context context = getContext();
+        Bitmap bitmap = null;
+
+        try {
+            bitmap = Glide.with(context)
+                    .load(Utility.getArtUrlForWeatherCondition(context, weatherId))
+                    .asBitmap()
+                    .into(25, 25)
+                    .get();
+
+            Log.v(LOG_TAG, "bitmap byte count " +bitmap.getByteCount());
+        } catch(Exception e) {
+            Log.e(LOG_TAG, "error");
+        }
+        return bitmap;
+    }
+
+
+// private
+//    if ( Utility.usingLocalGraphics(mContext) ) {
+//        forecastAdapterViewHolder.mIconView.setImageResource(defaultImage);
+//    } else {
+//        Glide.with(mContext)
+//                .load(Utility.getArtUrlForWeatherCondition(mContext, weatherId))
+//                .error(defaultImage)
+//                .crossFade()
+//                .into(forecastAdapterViewHolder.mIconView);
+ //   }
 }
