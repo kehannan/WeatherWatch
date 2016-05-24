@@ -61,11 +61,7 @@ import java.util.concurrent.TimeUnit;
 
 
 /**
- * Sample digital watch face with blinking colons and seconds. In ambient mode, the seconds are
- * replaced with an AM/PM indicator and the colons don't blink. On devices with low-bit ambient
- * mode, the text is drawn without anti-aliasing in ambient mode. On devices which require burn-in
- * protection, the hours are drawn in normal rather than bold. The time is drawn with less contrast
- * and without seconds in mute mode.
+ * Code is adapted from Android Sample watch code.
  */
 public class DigitalWatchFaceService extends CanvasWatchFaceService {
     private static final String TAG = "DigitalWatchFaceService";
@@ -260,39 +256,15 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
         @Override
         public void onVisibilityChanged(boolean visible) {
-//            if (Log.isLoggable(TAG, Log.DEBUG)) {
-//                Log.d(TAG, "onVisibilityChanged: " + visible);
-//            }
             super.onVisibilityChanged(visible);
-//
-//            if (visible) {
-//                mGoogleApiClient.connect();
-//
-//                registerReceiver();
-//
-//                // Update time zone and date formats, in case they changed while we weren't visible.
-//                mCalendar.setTimeZone(TimeZone.getDefault());
-//                initFormats();
-//            } else {
-//                unregisterReceiver();
-//
-//                if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
-//                    Wearable.DataApi.removeListener(mGoogleApiClient, this);
-//                    mGoogleApiClient.disconnect();
-//                }
-//            }
-//
-//            // Whether the timer should be running depends on whether we're visible (as well as
-//            // whether we're in ambient mode), so we may need to start or stop the timer.
-//            updateTimer();
         }
 
         private void initFormats() {
             mDayOfWeekFormat = new SimpleDateFormat("EEE", Locale.getDefault());
             mDayOfWeekFormat.setCalendar(mCalendar);
-            //mDateFormat = DateFormat.getDateFormat(DigitalWatchFaceService.this);
+
             mDateFormat = new SimpleDateFormat("EEE, MMM dd yyyy", Locale.getDefault());
-            //mDateFormat.setCalendar(mCalendar);
+
         }
 
         private void registerReceiver() {
@@ -344,11 +316,6 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             boolean burnInProtection = properties.getBoolean(PROPERTY_BURN_IN_PROTECTION, false);
 
             mLowBitAmbient = properties.getBoolean(PROPERTY_LOW_BIT_AMBIENT, false);
-
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "onPropertiesChanged: burn-in protection = " + burnInProtection
-                        + ", low-bit ambient = " + mLowBitAmbient);
-            }
         }
 
         @Override
@@ -363,19 +330,17 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
         @Override
         public void onAmbientModeChanged(boolean inAmbientMode) {
             super.onAmbientModeChanged(inAmbientMode);
-//            if (Log.isLoggable(TAG, Log.DEBUG)) {
-//                Log.d(TAG, "onAmbientModeChanged: " + inAmbientMode);
-//            }
-//            adjustPaintColorToCurrentMode(mBackgroundPaint, mInteractiveBackgroundColor,
-//                    DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_BACKGROUND);
-//            adjustPaintColorToCurrentMode(mHourPaint, mInteractiveHourDigitsColor,
-//                    DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_HOUR_DIGITS);
-//            adjustPaintColorToCurrentMode(mMinutePaint, mInteractiveMinuteDigitsColor,
-//                    DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_MINUTE_DIGITS);
-//            // Actually, the seconds are not rendered in the ambient mode, so we could pass just any
-//            // value as ambientColor here.
-//            adjustPaintColorToCurrentMode(mSecondPaint, mInteractiveSecondDigitsColor,
-//                    DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_SECOND_DIGITS);
+
+            adjustPaintColorToCurrentMode(mBackgroundPaint, mInteractiveBackgroundColor,
+                    DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_BACKGROUND);
+            adjustPaintColorToCurrentMode(mHourPaint, mInteractiveHourDigitsColor,
+                    DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_HOUR_DIGITS);
+            adjustPaintColorToCurrentMode(mMinutePaint, mInteractiveMinuteDigitsColor,
+                    DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_MINUTE_DIGITS);
+            // Actually, the seconds are not rendered in the ambient mode, so we could pass just any
+            // value as ambientColor here.
+            adjustPaintColorToCurrentMode(mSecondPaint, mInteractiveSecondDigitsColor,
+                    DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_SECOND_DIGITS);
 
             if (mLowBitAmbient) {
                 boolean antiAlias = !inAmbientMode;
@@ -474,15 +439,6 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             mDate.setTime(now);
             boolean is24Hour = DateFormat.is24HourFormat(DigitalWatchFaceService.this);
 
-            // conversion
-
-            float dp = 80f;
-            float scale = getResources().getDisplayMetrics().density;
-            float px = (int) (dp * scale +0.5);
-
-            Log.v(TAG, "mYoffset at beginning of onDraw " + mYOffset);
-            Log.v(TAG, "mYoffset in px " + px);
-
             // Show colons for the first half of each second so the colons blink on when the time
             // updates.
             mShouldDrawColons = (System.currentTimeMillis() % 1000) < 500;
@@ -540,30 +496,22 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             // Weather Info
             if(mLowTemp !=0 && mHighTemp !=0) {
 
-                // (l,t,b,r)
-                RectF rect = new RectF(25, 155, (155 + 15), (25+15));
-
                 String mWeather = Math.round(mLowTemp) + DEGREE + " " +
                         Math.round(mHighTemp) + DEGREE;
 
                 x = (bounds.width() - mWeatherPaint.measureText(mWeather))/2;
 
                 float y = mYOffset + 2 * mLineHeight;
-                float y_bit = y - 20;
+                float y_bit = y - 35;
 
                 Log.v(TAG, "mWeatherPaint.getTextSize " + mWeatherPaint.getTextSize());
 
                 if (weatherIcon !=null) {
                     Log.v(TAG, "trying to draw bitmap");
-                    //canvas.drawBitmap(weatherIcon, null, rect, mWeatherPaint);
                     canvas.drawBitmap(weatherIcon, 50, y_bit, null);
                 } else {
                     Log.v(TAG, "bitmap is null");
                 }
-
-                Log.v(TAG, "mYOffset " + mYOffset);
-                Log.v(TAG, "mLineHeight " +  mLineHeight);
-                Log.v(TAG, " y " + y);
 
                 canvas.drawText(
                         mWeather,
@@ -593,39 +541,6 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             return isVisible() && !isInAmbientMode();
         }
 
-        private void updateConfigDataItemAndUiOnStartup() {
-            DigitalWatchFaceUtil.fetchConfigDataMap(mGoogleApiClient,
-                    new DigitalWatchFaceUtil.FetchConfigDataMapCallback() {
-                        @Override
-                        public void onConfigDataMapFetched(DataMap startupConfig) {
-                            // If the DataItem hasn't been created yet or some keys are missing,
-                            // use the default values.
-                            setDefaultValuesForMissingConfigKeys(startupConfig);
-                            DigitalWatchFaceUtil.putConfigDataItem(mGoogleApiClient, startupConfig);
-
-                            updateUiForConfigDataMap(startupConfig);
-                        }
-                    }
-            );
-        }
-
-        private void setDefaultValuesForMissingConfigKeys(DataMap config) {
-            addIntKeyIfMissing(config, DigitalWatchFaceUtil.KEY_BACKGROUND_COLOR,
-                    DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_BACKGROUND);
-            addIntKeyIfMissing(config, DigitalWatchFaceUtil.KEY_HOURS_COLOR,
-                    DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_HOUR_DIGITS);
-            addIntKeyIfMissing(config, DigitalWatchFaceUtil.KEY_MINUTES_COLOR,
-                    DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_MINUTE_DIGITS);
-            addIntKeyIfMissing(config, DigitalWatchFaceUtil.KEY_SECONDS_COLOR,
-                    DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_SECOND_DIGITS);
-        }
-
-        private void addIntKeyIfMissing(DataMap config, String key, int color) {
-            if (!config.containsKey(key)) {
-                config.putInt(key, color);
-            }
-        }
-
         @Override // DataApi.DataListener
         public void onDataChanged(DataEventBuffer dataEvents) {
 
@@ -639,11 +554,6 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                 DataItem dataItem = dataEvent.getDataItem();
 
                 Log.v(TAG, "dataItem.getUri().getPath() " + dataItem.getUri().getPath());
-
-//                if (!dataItem.getUri().getPath().equals(
-//                        DigitalWatchFaceUtil.PATH_WITH_FEATURE)) {
-//                    continue;
-//                }
 
                 if (dataItem.getUri().getPath().equals(API_PATH)) {
 
@@ -699,47 +609,12 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             }
         }
 
-        private void updateUiForConfigDataMap(final DataMap config) {
-            boolean uiUpdated = false;
-            for (String configKey : config.keySet()) {
-                if (!config.containsKey(configKey)) {
-                    continue;
-                }
-                int color = config.getInt(configKey);
-                if (Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, "Found watch face config key: " + configKey + " -> "
-                            + Integer.toHexString(color));
-                }
-                if (updateUiForKey(configKey, color)) {
-                    uiUpdated = true;
-                }
-            }
-            if (uiUpdated) {
-                invalidate();
-            }
-        }
-
         /**
          * Updates the color of a UI item according to the given {@code configKey}. Does nothing if
          * {@code configKey} isn't recognized.
          *
          * @return whether UI has been updated
          */
-        private boolean updateUiForKey(String configKey, int color) {
-            if (configKey.equals(DigitalWatchFaceUtil.KEY_BACKGROUND_COLOR)) {
-                setInteractiveBackgroundColor(color);
-            } else if (configKey.equals(DigitalWatchFaceUtil.KEY_HOURS_COLOR)) {
-                setInteractiveHourDigitsColor(color);
-            } else if (configKey.equals(DigitalWatchFaceUtil.KEY_MINUTES_COLOR)) {
-                setInteractiveMinuteDigitsColor(color);
-            } else if (configKey.equals(DigitalWatchFaceUtil.KEY_SECONDS_COLOR)) {
-                setInteractiveSecondDigitsColor(color);
-            } else {
-                Log.w(TAG, "Ignoring unknown config key: " + configKey);
-                return false;
-            }
-            return true;
-        }
 
         @Override  // GoogleApiClient.ConnectionCallbacks
         public void onConnected(Bundle connectionHint) {
