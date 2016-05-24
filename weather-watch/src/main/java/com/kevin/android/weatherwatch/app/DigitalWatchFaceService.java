@@ -26,6 +26,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -57,6 +58,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+
 
 /**
  * Sample digital watch face with blinking colons and seconds. In ambient mode, the seconds are
@@ -130,6 +132,13 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
         // Weather icon
         Bitmap weatherIcon;
+
+        // keys and dimensions for google api
+        public static final String API_PATH = "/watch-weather";
+        public static final String TIME_STAMP = "timestamp";
+        public static final String LOW_TEMP = "low";
+        public static final String HIGH_TEMP = "high";
+        public static final String WEATHER_ICON = "weatherIcon";
 
         GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(DigitalWatchFaceService.this)
                 .addConnectionCallbacks(this)
@@ -221,6 +230,8 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             mSecondPaint = createTextPaint(mInteractiveSecondDigitsColor);
             mAmPmPaint = createTextPaint(resources.getColor(R.color.digital_am_pm));
             mColonPaint = createTextPaint(resources.getColor(R.color.digital_colons));
+
+            mDatePaint.setAlpha(150);
 
             mCalendar = Calendar.getInstance();
             mDate = new Date();
@@ -314,18 +325,14 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             boolean isRound = insets.isRound();
             mXOffset = resources.getDimension(isRound
                     ? R.dimen.digital_x_offset_round : R.dimen.digital_x_offset);
-            float textSize = resources.getDimension(isRound
-                    ? R.dimen.digital_text_size_round : R.dimen.digital_text_size);
-            float amPmSize = resources.getDimension(isRound
-                    ? R.dimen.digital_am_pm_size_round : R.dimen.digital_am_pm_size);
 
-            mDatePaint.setTextSize(resources.getDimension(R.dimen.digital_date_text_size));
-            mHourPaint.setTextSize(textSize);
-            mMinutePaint.setTextSize(textSize);
-            mSecondPaint.setTextSize(textSize);
-            mAmPmPaint.setTextSize(amPmSize);
-            mColonPaint.setTextSize(textSize);
-            mWeatherPaint.setTextSize(textSize);
+
+            mDatePaint.setTextSize(resources.getDimension(R.dimen.date_text_size));
+            mHourPaint.setTextSize(resources.getDimension(R.dimen.time_text_size));
+            mMinutePaint.setTextSize(resources.getDimension(R.dimen.time_text_size));
+            mAmPmPaint.setTextSize(resources.getDimension(R.dimen.digital_am_pm_size));
+            mColonPaint.setTextSize(resources.getDimension(R.dimen.time_text_size));
+            mWeatherPaint.setTextSize(resources.getDimension(R.dimen.date_text_size));
 
             mColonWidth = mColonPaint.measureText(COLON_STRING);
         }
@@ -467,6 +474,15 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             mDate.setTime(now);
             boolean is24Hour = DateFormat.is24HourFormat(DigitalWatchFaceService.this);
 
+            // conversion
+
+            float dp = 80f;
+            float scale = getResources().getDisplayMetrics().density;
+            float px = (int) (dp * scale +0.5);
+
+            Log.v(TAG, "mYoffset at beginning of onDraw " + mYOffset);
+            Log.v(TAG, "mYoffset in px " + px);
+
             // Show colons for the first half of each second so the colons blink on when the time
             // updates.
             mShouldDrawColons = (System.currentTimeMillis() % 1000) < 500;
@@ -499,6 +515,7 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
             // Draw the hours, colon and minutes
             canvas.drawText(hourString, x, mYOffset, mHourPaint);
+            // increment x by length of hour string
             x += mHourPaint.measureText(hourString);
 
             // In ambient and mute modes, always draw the first colon. Otherwise, draw the
@@ -510,9 +527,6 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
             // Draw the minutes.
             canvas.drawText(minuteString, x, mYOffset, mMinutePaint);
-            //x += mMinutePaint.measureText(minuteString);
-
-
 
             // Date
             String mFormattedDate =  mDateFormat.format(mDate);
@@ -524,19 +538,36 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
 
             // Weather Info
-
             if(mLowTemp !=0 && mHighTemp !=0) {
+
+                // (l,t,b,r)
+                RectF rect = new RectF(25, 155, (155 + 15), (25+15));
 
                 String mWeather = Math.round(mLowTemp) + DEGREE + " " +
                         Math.round(mHighTemp) + DEGREE;
 
                 x = (bounds.width() - mWeatherPaint.measureText(mWeather))/2;
 
-                canvas.drawBitmap(weatherIcon, 50, mYOffset + 2 * mLineHeight, mWeatherPaint);
+                float y = mYOffset + 2 * mLineHeight;
+                float y_bit = y - 20;
+
+                Log.v(TAG, "mWeatherPaint.getTextSize " + mWeatherPaint.getTextSize());
+
+                if (weatherIcon !=null) {
+                    Log.v(TAG, "trying to draw bitmap");
+                    //canvas.drawBitmap(weatherIcon, null, rect, mWeatherPaint);
+                    canvas.drawBitmap(weatherIcon, 50, y_bit, null);
+                } else {
+                    Log.v(TAG, "bitmap is null");
+                }
+
+                Log.v(TAG, "mYOffset " + mYOffset);
+                Log.v(TAG, "mLineHeight " +  mLineHeight);
+                Log.v(TAG, " y " + y);
 
                 canvas.drawText(
                         mWeather,
-                        x, mYOffset + 3 * mLineHeight, mWeatherPaint);
+                        x, y, mWeatherPaint);
             }
         }
 
@@ -614,7 +645,7 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 //                    continue;
 //                }
 
-                if (dataItem.getUri().getPath().equals("/mypath")) {
+                if (dataItem.getUri().getPath().equals(API_PATH)) {
 
 
                     DataMap dataMap = DataMapItem.fromDataItem(dataItem).getDataMap();
@@ -622,9 +653,9 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                     Log.v(TAG, String.valueOf(dataMap.getDouble("low")));
                     Log.v(TAG, String.valueOf(dataMap.getDouble("high")));
 
-                    mLowTemp = dataMap.getDouble("low");
-                    mHighTemp = dataMap.getDouble("high");
-                    Asset iconAsset = dataMap.getAsset("weatherIcon");
+                    mLowTemp = dataMap.getDouble(LOW_TEMP);
+                    mHighTemp = dataMap.getDouble(HIGH_TEMP);
+                    Asset iconAsset = dataMap.getAsset(WEATHER_ICON);
                     new LoadIconAsynchTask().execute(iconAsset);
                 }
                 invalidate();
@@ -667,28 +698,6 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                 }
             }
         }
-
-//        public Bitmap loadBitmapFromAsset(Asset asset) {
-//            if (asset == null) {
-//                throw new IllegalArgumentException("Asset must be non-null");
-//            }
-//            ConnectionResult result = mGoogleApiClient.blockingConnect(100, TimeUnit.MILLISECONDS);
-//            if (!result.isSuccess()) {
-//                return null;
-//            }
-//            // convert asset into a file descriptor and block until it's ready
-//            InputStream assetInputStream = Wearable.DataApi.getFdForAsset(
-//                    mGoogleApiClient, asset).await().getInputStream();
-//            mGoogleApiClient.disconnect();
-//
-//            if (assetInputStream == null) {
-//                Log.w(TAG, "Requested an unknown Asset.");
-//                return null;
-//            }
-//            // decode the stream into a bitmap
-//            return BitmapFactory.decodeStream(assetInputStream);
-//        }
-
 
         private void updateUiForConfigDataMap(final DataMap config) {
             boolean uiUpdated = false;

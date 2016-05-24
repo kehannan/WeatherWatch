@@ -89,6 +89,14 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements
     private static final int INDEX_MIN_TEMP = 2;
     private static final int INDEX_SHORT_DESC = 3;
 
+    // keys and dimensions for google api
+    public static final String API_PATH = "/watch-weather";
+    public static final String TIME_STAMP = "timestamp";
+    public static final String LOW_TEMP = "low";
+    public static final String HIGH_TEMP = "high";
+    public static final String WEATHER_ICON = "weatherIcon";
+    public static final int WATCH_ICON_DIMENSION = 35;
+
     @Override
     public void onConnected(Bundle bundle) {
 
@@ -706,14 +714,14 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements
 
         Log.v(LOG_TAG, "sendNotification()");
 
-        PutDataMapRequest dataMapRequest = PutDataMapRequest.create("/mypath").setUrgent();
-        dataMapRequest.getDataMap().putDouble("time_stamp", System.currentTimeMillis());
-        dataMapRequest.getDataMap().putDouble("low", low);
-        dataMapRequest.getDataMap().putDouble("high", high);
+        PutDataMapRequest dataMapRequest = PutDataMapRequest.create(API_PATH).setUrgent();
+        dataMapRequest.getDataMap().putDouble(TIME_STAMP, System.currentTimeMillis());
+        dataMapRequest.getDataMap().putDouble(LOW_TEMP, low);
+        dataMapRequest.getDataMap().putDouble(HIGH_TEMP, high);
 
         Asset asset = createAssetFromBitmap(getSmallImage(weatherId));
 
-        dataMapRequest.getDataMap().putAsset("weatherIcon", asset);
+        dataMapRequest.getDataMap().putAsset(WEATHER_ICON, asset);
         PutDataRequest putDataRequest = dataMapRequest.asPutDataRequest();
         Wearable.DataApi.putDataItem(mGoogleApiClient, putDataRequest)
                 .setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
@@ -735,6 +743,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements
         return Asset.createFromBytes(byteStream.toByteArray());
     }
 
+    // retrieve the image to pass to the watch
     private Bitmap getSmallImage(int weatherId) {
 
         Context context = getContext();
@@ -744,7 +753,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements
             bitmap = Glide.with(context)
                     .load(Utility.getArtUrlForWeatherCondition(context, weatherId))
                     .asBitmap()
-                    .into(25, 25)
+                    .into(WATCH_ICON_DIMENSION, WATCH_ICON_DIMENSION)
                     .get();
 
             Log.v(LOG_TAG, "bitmap byte count " +bitmap.getByteCount());
@@ -753,16 +762,4 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements
         }
         return bitmap;
     }
-
-
-// private
-//    if ( Utility.usingLocalGraphics(mContext) ) {
-//        forecastAdapterViewHolder.mIconView.setImageResource(defaultImage);
-//    } else {
-//        Glide.with(mContext)
-//                .load(Utility.getArtUrlForWeatherCondition(mContext, weatherId))
-//                .error(defaultImage)
-//                .crossFade()
-//                .into(forecastAdapterViewHolder.mIconView);
- //   }
 }
